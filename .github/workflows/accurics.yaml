@@ -16,5 +16,5 @@ jobs:
         with:
           only_warn: true
           verbose: true
-          webhook_url: https://app.accurics.com/v1/api/terrascan
-          webhook_token: c272b42f-dcde-4f3f-8857-8ff57b180f35
+          webhook_url: http://localhost:8080/v1/api/terrascan
+          webhook_token: 425a987d-e1b7-47a8-bfde-e6557b4fd2ad

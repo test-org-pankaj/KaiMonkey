@@ -47,7 +47,7 @@ resource "aws_db_instance" "km_db" {
   allocated_storage         = 20
   engine                    = "postgres"
   engine_version            = "10.6"
-  instance_class            = "db.t3.medium"
+  instance_class            = "db.m5.xlarge"
   storage_type              = "gp2"
   password                  = var.db_password
   username                  = var.db_username

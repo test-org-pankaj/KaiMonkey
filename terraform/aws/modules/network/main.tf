@@ -108,14 +108,14 @@ resource "aws_security_group" "km_alb_sg" {
     protocol    = "tcp"
     from_port   = 443
     to_port     = 443
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["<cidr>"]
   }
 
   ingress {
     protocol    = "tcp"
     from_port   = 80
     to_port     = 80
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["<cidr>"]
   }
 
   egress {
@@ -162,17 +162,17 @@ resource "aws_lb" "km_lb" {
 resource "aws_lb_target_group" "km_lb_target" {
   name        = "km-lb-target-group-${var.environment}"
   port        = 80
-  protocol    = "HTTP"
+  protocol    = "HTTPS"
   vpc_id      = aws_vpc.km_vpc.id
   target_type = "ip"
-  depends_on = [ aws_lb.km_lb ]
+  depends_on  = [aws_lb.km_lb]
 }
 
 # Redirect all traffic from the ALB to the target group
 resource "aws_lb_listener" "km_frontend_listener" {
   load_balancer_arn = aws_lb.km_lb.arn
   port              = "80"
-  protocol          = "HTTP"
+  protocol          = "HTTPS"
   default_action {
     target_group_arn = aws_lb_target_group.km_lb_target.arn
     type             = "forward"

@@ -249,7 +249,7 @@ resource "aws_security_group" "web-app-security-group" {
   }
 
   ingress {
-    cidr_blocks      = ["0.0.0.0/0"]
+    cidr_blocks      = ["<cidr>"]
     from_port        = 22
     ipv6_cidr_blocks = ["::/0"]
     protocol         = "tcp"
@@ -258,7 +258,7 @@ resource "aws_security_group" "web-app-security-group" {
   }
 
   ingress {
-    cidr_blocks      = ["0.0.0.0/0"]
+    cidr_blocks      = ["<cidr>"]
     from_port        = 80
     ipv6_cidr_blocks = ["::/0"]
     protocol         = "tcp"
@@ -267,7 +267,7 @@ resource "aws_security_group" "web-app-security-group" {
   }
 
   ingress {
-    cidr_blocks      = ["0.0.0.0/0"]
+    cidr_blocks      = ["<cidr>"]
     from_port        = 8080
     ipv6_cidr_blocks = ["::/0"]
     protocol         = "tcp"
@@ -296,7 +296,7 @@ resource "aws_instance" "web-app-instance" {
   iam_instance_profile = aws_iam_instance_profile.web-app-instance-profile.name
 
   disable_api_termination = "false"
-  ebs_optimized           = "false"
+  ebs_optimized           = true
 
   enclave_options {
     enabled = "false"
@@ -309,12 +309,13 @@ resource "aws_instance" "web-app-instance" {
   key_name           = aws_key_pair.cg-ec2-key-pair.key_name
 
   metadata_options {
-    http_endpoint               = "enabled"
+    http_endpoint               = "disabled"
     http_put_response_hop_limit = "1"
-    http_tokens                 = "optional"
+    http_tokens                 = "required"
+
   }
 
-  monitoring = "false"
+  monitoring = true
   private_ip = "10.10.10.55"
 
   root_block_device {
@@ -367,7 +368,7 @@ resource "aws_instance" "privileged-instance" {
   associate_public_ip_address = "true"
 
   disable_api_termination = "false"
-  ebs_optimized           = "false"
+  ebs_optimized           = true
 
   enclave_options {
     enabled = "false"
@@ -381,12 +382,13 @@ resource "aws_instance" "privileged-instance" {
   key_name             = aws_key_pair.cg-ec2-key-pair.key_name
 
   metadata_options {
-    http_endpoint               = "enabled"
+    http_endpoint               = "disabled"
     http_put_response_hop_limit = "1"
-    http_tokens                 = "optional"
+    http_tokens                 = "required"
+
   }
 
-  monitoring = "false"
+  monitoring = true
   private_ip = "10.10.20.69"
 
   root_block_device {

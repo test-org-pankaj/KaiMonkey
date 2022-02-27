@@ -111,4 +111,4 @@ This will spin up a dashboard, run the first scan and present you with a detaile
 4. Select set of policies.
 5. Verify details and finish.
 
-Similar to the IaC scan, the dashboard will highlight security violations in the cloud environment.
+Similar to the IaC scan, the dashboard will highlight security violations in the cloud environment

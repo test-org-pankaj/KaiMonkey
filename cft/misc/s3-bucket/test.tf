@@ -1,6 +1,6 @@
 resource "aws_s3_bucket" "mybucket" {
   bucket = "mybucket"
-  acl = "public"
+  acl    = "public"
 
   server_side_encryption_configuration {
     rule {
@@ -41,4 +41,45 @@ resource "aws_s3_bucket_policy" "b" {
       },
     ]
   })
+}
+
+resource aws_s3_bucket_versioning example {
+  bucket = aws_s3_bucket.mybucket.bucket
+
+  versioning_configuration {
+    status = Enabled
+  }
+}
+resource "aws_s3_bucket_policy" "mybucketPolicy" {
+  bucket = "${aws_s3_bucket.mybucket.id}"
+
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "mybucket-restrict-access-to-users-or-roles",
+      "Effect": "Allow",
+      "Principal": [
+        {
+          "AWS": [
+            <aws_policy_role_arn>
+          ]
+        }
+      ],
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::${aws_s3_bucket.mybucket.id}/*"
+    }
+  ]
+}
+POLICY
+}
+resource "aws_s3_bucket_server_side_encryption_configuration" "example" {
+  bucket = aws_s3_bucket.mybucket.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "aws:kms"
+    }
+  }
 }

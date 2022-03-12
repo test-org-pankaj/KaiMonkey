@@ -20,7 +20,7 @@ resource "aws_security_group" "km_rds_sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["<cidr>"]
   }
 
   # outbound internet access
@@ -47,7 +47,7 @@ resource "aws_db_instance" "km_db" {
   allocated_storage         = 20
   engine                    = "postgres"
   engine_version            = "10.6"
-  instance_class            = "db.t3.medium"
+  instance_class            = "db.m5.xlarge"
   storage_type              = "gp2"
   password                  = var.db_password
   username                  = var.db_username
@@ -61,6 +61,8 @@ resource "aws_db_instance" "km_db" {
   tags = merge(var.default_tags, {
     Name = "km_db_${var.environment}"
   })
+  iam_database_authentication_enabled = true
+  backup_retention_period             = 30
 }
 
 resource "aws_ssm_parameter" "km_ssm_db_host" {
@@ -116,6 +118,94 @@ resource "aws_s3_bucket" "km_public_blob" {
 resource "aws_s3_bucket_public_access_block" "km_public_blob" {
   bucket = aws_s3_bucket.km_public_blob.id
 
-  block_public_acls   = false
+  block_public_acls   = true
   block_public_policy = false
+}
+resource "aws_s3_bucket_policy" "km_blob_storagePolicy" {
+  bucket = "${aws_s3_bucket.km_blob_storage.id}"
+
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "km_blob_storage-restrict-access-to-users-or-roles",
+      "Effect": "Allow",
+      "Principal": [
+        {
+          "AWS": [
+            <aws_policy_role_arn>
+          ]
+        }
+      ],
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::${aws_s3_bucket.km_blob_storage.id}/*"
+    }
+  ]
+}
+POLICY
+}
+resource aws_s3_bucket_versioning example {
+  bucket = aws_s3_bucket.km-public-blob.bucket
+
+  versioning_configuration {
+    status = Enabled
+  }
+}
+resource "aws_s3_bucket_policy" "km_public_blobPolicy" {
+  bucket = "${aws_s3_bucket.km_public_blob.id}"
+
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "km_public_blob-restrict-access-to-users-or-roles",
+      "Effect": "Allow",
+      "Principal": [
+        {
+          "AWS": [
+            <aws_policy_role_arn>
+          ]
+        }
+      ],
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::${aws_s3_bucket.km_public_blob.id}/*"
+    }
+  ]
+}
+POLICY
+}
+resource "aws_s3_bucket_server_side_encryption_configuration" "example" {
+  bucket = aws_s3_bucket.km-public-blob.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "aws:kms"
+    }
+  }
+}
+resource "aws_s3_bucket_policy" "km_blob_storagePolicy" {
+  bucket = "${aws_s3_bucket.km_blob_storage.id}"
+
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "km_blob_storage-restrict-access-to-users-or-roles",
+      "Effect": "Allow",
+      "Principal": [
+        {
+          "AWS": [
+            <aws_policy_role_arn>
+          ]
+        }
+      ],
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::${aws_s3_bucket.km_blob_storage.id}/*"
+    }
+  ]
+}
+POLICY
 }
